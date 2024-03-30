@@ -1,0 +1,15 @@
+#### Library/Tools Version
+- TensorFlow - 2.9.0
+- gc - (included with Python)
+- numpy - 1.23.0
+- mlxtend - 0.19.0
+- scikit-learn - 1.1.1
+- argparse - (included with Python)
+- re - (included with Python)
+- Python - v3.10.x / v3.11
+- shutil - (included with Python)
+- Keras-preprocessing - (included with Keras)
+- random - (included with Python)
+- PIL/Pillow - 9.2.0
+- Matplotlib - 3.5.2
+- Keras - 2.9.0
