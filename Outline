@@ -1,0 +1,88 @@
+### Cancer Detection from Nanoscopic-Tissue Images with Deep Learning (AI ML, Neural Network) 
+<pre>
+Domain             : Computer Vision, Machine Learning
+Sub-Domain         : Deep Learning, Image Recognition
+Techniques         : Deep Convolutional Neural Network, Transfer Learning, ImageNet, Auto ML, NASNetMobile
+Application        : Image Recognition, Image Classification, Medical Imaging
+</pre>
+
+### Description
+<pre>
+1. used autoML (Google's "NASNet") to identify cancer from microscopic tissue photos (histopathologic).
+2. To get the final output prediction for training, concatenate global pooling (max, average), dropout, and dense layers to the output layer.
+3. Achieved a 90.21% testing accuracy and a 0.45 loss on a cancer imaging dataset with over 250K images (7.5GB+).
+
+#### Dataset
+<pre>
+Dataset Name     : Histopathologic Cancer Detection
+Dataset Link     : <a href=https://www.kaggle.com/c/histopathologic-cancer-detection>Histopathologic Cancer Detection (Kaggle)</a>
+                 : <a href=https://github.com/basveeling/pcam>PatchCamelyon (PCam) (GitHub)</a>
+                 : <a href=https://camelyon16.grand-challenge.org/Data/>CAMELYON16 challenge Dataset (Original Dataset)</a>
+                 
+Original Paper   : <a href=https://jamanetwork.com/journals/jama/fullarticle/2665774>Diagnostic Assessment of Deep Learning Algorithms for Detection of Lymph Node Metastases in Women With Breast Cancer </a> 
+                   Authors: Babak Ehteshami Bejnordi, Mitko Veta, Paul Johannes van Diest 
+                   JAMA (The Journal of the American Medical Association)
+                   <cite>Ehteshami Bejnordi B, Veta M, Johannes van Diest P, et al. Diagnostic Assessment of Deep Learning Algorithms for Detection of Lymph Node Metastases in Women With Breast Cancer. JAMA. 2017;318(22):2199–2210. doi:10.1001/jama.2017.14585</cite>
+</pre>
+
+### Dataset Details
+<pre>
+Dataset Name            : Cancer Detection
+Number of Class         : 2
+</pre>
+
+| Dataset Subtype | Number of Image | Size of Images (GB/Gigabyte) |
+| :-------------- | --------------: | ---------------------------: |
+| **Total**       | 234,055         | 6.82 GB                      |
+| **Training**    | 135,008         | 4.93 GB                      |
+| **Validation**  | 54,005          | 2.16 GB                      |
+| **Testing**     | 55,004          | 1.18 GB                      |
+
+
+### Model and Training Prameters
+| Current Parameters   | Value                                                       |
+| :------------------- | ----------------------------------------------------------: |
+| **Base Model**       | NashNetLarge                                                |
+| **Optimizers**       | Adam                                                        |
+| **Loss Function**    | Categorical Crossentropy                                    |
+| **Learning Rate**    | 0.0002                                                      |
+| **Batch Size**       | 32                                                          |                                     
+| **Number of Epochs** | 2                                                           |
+| **Training Time**    | 6.5 hour (270 min)                                          |
+
+
+### Model Performance Metrics (Prediction/ Recognition / Classification)
+| Dataset              | Training       | Validation    | Test      |                                 
+| :------------------- | -------------: | ------------: | --------: |
+| **Accuracy**         | 92.42%         | 93.62%        | 90.21%    |
+| **Loss**             | 0.22           | 0.25          | 0.40     |
+| **Precision**        | ---            | ---           | 86.87%    |
+| **Recall**           | ---            | ---           | 88.09%    |
+| **Roc-Auc**          | ---            | ---           | 92.76%    |
+
+
+### Other Experimented Model and Training Prameters
+| Parameters (Experimented) | Value                                                  |
+| :------------------------ | -----------------------------------------------------: |
+| **Base Models**           | NashNet(NashNetLarge, NashNetMobile), InceptionV3      |
+| **Optimizers**            | Adam, SGD                                              |
+| **Loss Function**         | Categorical Crossentropy, Binary Crossentropy          |
+| **Learning Rate**         | 0.0001, 0.00001, 0.000001, 0.0000001                   |
+| **Batch Size**            | 32, 64, 128, 256, 512                                  |                                     
+| **Number of Epochs**      | 2, 4, 6, 10, 30, 50, 100                               |
+| **Training Time**         | 4.5 hour (270 min), 1 day (24 hours), 2 days (24 hours)|
+
+
+##### Sample Output: 
+<kbd>
+<img src=https://github.com/siddhartha18pahari/GENAI/blob/main/CANCER1.png>
+</kbd>
+
+
+#### Tools / Libraries
+<pre>
+Languages               : Python
+Tools/IDE               : Anaconda
+Libraries               : Keras, TensorFlow, Inception, ImageNet
+</pre>
+
