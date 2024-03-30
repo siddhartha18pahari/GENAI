@@ -1,0 +1,46 @@
+import os
+import shutil
+from tqdm import tqdm
+
+def move_files(from_path, to_path, percent):
+    # Ensure the paths are valid
+    if not os.path.isdir(from_path) or not os.path.isdir(to_path):
+        print("One of the paths does not exist.")
+        return
+
+    # Gather all filenames from both directories
+    from_files = os.listdir(from_path)
+    to_files = os.listdir(to_path)
+    
+    # Calculate the total number of files after the move
+    total_files_num = len(from_files) + len(to_files)
+    # Calculate the target number of files in the 'to' directory
+    target_num = total_files_num * percent / 100
+    
+    # If the 'to' directory already has more files than target, return
+    if len(to_files) >= target_num:
+        print("No movement required.")
+        return
+
+    # Calculate the number of files to move
+    files_to_move = int(target_num - len(to_files))
+
+    # Move the files
+    for name in tqdm(from_files[:files_to_move], desc=f"Moving files from {from_path} to {to_path}"):
+        shutil.move(os.path.join(from_path, name), os.path.join(to_path, name))
+    
+    # Post-move summary
+    print(f"Moved {files_to_move} files from {from_path} to {to_path}.")
+    print(f"Updated counts: {os.path.basename(from_path)}: {len(os.listdir(from_path))}, {os.path.basename(to_path)}: {len(os.listdir(to_path))}")
+
+# Example usage
+test_norm = r'data/test/NORMAL'
+test_pneu = r'data/test/PNEUMONIA'
+
+val_norm = r'data/val/NORMAL'
+val_pneu = r'data/val/PNEUMONIA'
+
+print('Data load initiated')
+
+move_files(test_norm, val_norm, 50)
+move_files(test_pneu, val_pneu, 50)
