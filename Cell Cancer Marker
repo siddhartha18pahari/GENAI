@@ -1,0 +1,297 @@
+# Library Imports
+import os
+import shutil
+import datetime
+import gc
+import re
+import random
+import numpy as np
+import pandas as pd
+from collections import Counter
+import cv2
+from PIL import Image
+import keras
+from keras.preprocessing.image import ImageDataGenerator
+from keras.models import Sequential, Model
+from keras.layers import Dense, Conv2D, MaxPooling2D, Flatten, Dropout, Input, GlobalMaxPooling2D, GlobalAveragePooling2D, Concatenate
+from keras.callbacks import ModelCheckpoint, EarlyStopping, TensorBoard, ReduceLROnPlateau
+from keras.optimizers import Adam
+from keras.applications.nasnet import NASNetMobile
+from sklearn.utils import class_weight
+import tensorflow as tf
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Function Definitions
+
+# Here, you can include all the function definitions as provided in the code blocks. For brevity, I'm not repeating those function definitions.
+
+# Example of one function to include:
+def reset_graph(model=None):
+    if model:
+        try:
+            del model
+        except:
+            return False
+    tf.compat.v1.reset_default_graph()
+    keras.backend.clear_session()
+    gc.collect()
+    return True
+
+# Main Code
+
+# Set directories for training, validation, and testing
+input_directory = "data/input/"
+output_directory = "data/output/"
+training_dir = input_directory + "train_final"
+validation_dir = input_directory + "validation_final"
+testing_dir = input_directory + "test_final"
+
+# Create necessary directories
+figure_directory = "data/output/figures"
+if not os.path.exists(figure_directory):
+    os.mkdir(figure_directory)
+
+# Reset graph and callbacks
+reset_graph()
+reset_callbacks()
+
+# Define and compile the model (choose one of the model functions)
+model = get_model_nasnet3()  # Example model function call
+
+# Compile the model
+model.compile(optimizer=Adam(0.0001), loss='categorical_crossentropy', metrics=['acc'])
+
+# Prepare data generators
+train_datagen = ImageDataGenerator(rescale=1./255)
+train_generator = train_datagen.flow_from_directory(
+    training_dir,
+    target_size=(96, 96),
+    batch_size=128,
+    class_mode='categorical')
+
+# Repeat for validation_generator and test_generator...
+
+# Train the model
+history = model.fit_generator(
+    train_generator,
+    steps_per_epoch=len(train_generator),
+    epochs=10,
+    callbacks=[ModelCheckpoint('model.hdf5', save_best_only=True), EarlyStopping(patience=3)],
+    validation_data=validation_generator,
+    validation_steps=len(validation_generator))
+
+# Visualize training results
+# Here, include the code to plot the training and validation accuracy and loss.
+
+#Save Training Series
+import pickle
+
+def save_history_result(history, filename):
+    history_dict = {
+        'acc': history.history['acc'],
+        'val_acc': history.history['val_acc'],
+        'loss': history.history['loss'],
+        'val_loss': history.history['val_loss']
+    }
+
+    with open(filename, 'wb') as handle:
+        pickle.dump(history_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+history_file = model_dir + 'history.pickle'
+save_history_result(history, history_file)
+
+# Load and print to verify
+with open(history_file, 'rb') as handle:
+    history_dict = pickle.load(handle)
+    print(history_dict)
+#Test Saved Models
+dir_name = "data/output/models/"
+dirs = sorted(os.listdir(dir_name))  # Sort to ensure consistency
+
+for i, folder in enumerate(dirs):
+    print(f"{i}: {folder}")
+
+chosen_dir_index = 2  # Example index
+cur_dir = dir_name + dirs[chosen_dir_index] + "/"
+model_names = sorted(os.listdir(cur_dir))  # Sort to ensure consistency
+
+for i, model_name in enumerate(model_names):
+    print(f"{i}: {model_name}")
+
+# Choose a model to load, for example:
+model_file = cur_dir + model_names[0]  # Change index based on choice
+model = keras.models.load_model(model_file)
+
+from keras.preprocessing.image import ImageDataGenerator
+from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, classification_report
+import matplotlib.pyplot as plt
+from mlxtend.plotting import plot_confusion_matrix
+
+test_datagen = ImageDataGenerator(rescale=1.0/255)
+test_generator = test_datagen.flow_from_directory(
+    testing_dir,
+    target_size=(96, 96),
+    classes=classes,
+    class_mode='categorical',
+    batch_size=1024,
+    shuffle=False)
+
+nsteps = len(test_generator)
+result = model.evaluate_generator(test_generator, steps=nsteps)
+print(f"Loss: {result[0]:.2f}, Accuracy: {result[1]*100:.2f}%")
+
+# Predict on the test set
+y_pred = model.predict_generator(test_generator, steps=nsteps).argmax(axis=-1)
+
+# Assuming y_true is known
+y_true = get_true_labels_batch(test_generator, nsteps=nsteps)  # Function defined in your input
+
+# Metrics and Confusion Matrix
+precision = precision_score(y_true, y_pred)
+recall = recall_score(y_true, y_pred)
+f1 = f1_score(y_true, y_pred)
+roc_auc = roc_auc_score(y_true, y_pred)
+
+print(f"Precision: {precision*100:.2f}%")
+print(f"Recall: {recall*100:.2f}%")
+print(f"F1-Score: {f1*100:.2f}%")
+print(f"Roc-Auc: {roc_auc*100:.2f}%")
+
+CM = confusion_matrix(y_true, y_pred)
+fig, ax = plot_confusion_matrix(conf_mat=CM, figsize=(10, 8), hide_ticks=True, cmap=plt.cm.Blues)
+plt.xticks(range(len(classes)), classes, fontsize=12)
+plt.yticks(range(len(classes)), classes, fontsize=12)
+plt.show()
+
+# Classification Report
+cls_report = classification_report(y_true, y_pred, target_names=classes)
+print(cls_report)
+
+from keras.preprocessing.image import ImageDataGenerator
+from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score, confusion_matrix, classification_report
+import matplotlib.pyplot as plt
+from mlxtend.plotting import plot_confusion_matrix
+import keras
+
+# Assuming 'model' is your trained Keras model and 'testing_dir' is the directory of your test dataset
+# Ensure 'classes' list is defined, representing the class labels in your dataset
+
+# Define the ImageDataGenerator for testing
+test_datagen = ImageDataGenerator(rescale=1.0/255)
+
+# Prepare the data generator for evaluation
+test_generator = test_datagen.flow_from_directory(
+    testing_dir,
+    target_size=(96, 96),
+    classes=classes,
+    class_mode='categorical',
+    batch_size=1024,
+    shuffle=False)
+
+# Calculate steps per epoch for testing
+nsteps = len(test_generator)
+
+# Evaluate the model on the test set
+result = model.evaluate_generator(test_generator, steps=nsteps)
+print(f"Loss: {result[0]:.2f}, Accuracy: {result[1]*100:.2f}%")
+
+# Generate predictions for the test set
+y_pred = model.predict_generator(test_generator, steps=nsteps).argmax(axis=-1)
+
+# Assume 'get_true_labels_batch' function is defined and correctly retrieves the true labels for your test dataset
+y_true = get_true_labels_batch(test_generator, nsteps=nsteps)
+
+# Calculate precision, recall, F1-score, and ROC-AUC
+precision = precision_score(y_true, y_pred)
+recall = recall_score(y_true, y_pred)
+f1 = f1_score(y_true, y_pred)
+roc_auc = roc_auc_score(y_true, y_pred)
+
+# Print the calculated metrics
+print(f"Precision: {precision*100:.2f}%")
+print(f"Recall: {recall*100:.2f}%")
+print(f"F1-Score: {f1*100:.2f}%")
+print(f"Roc-Auc: {roc_auc*100:.2f}%")
+
+# Generate and display the confusion matrix
+CM = confusion_matrix(y_true, y_pred)
+fig, ax = plot_confusion_matrix(conf_mat=CM, figsize=(10, 8), hide_ticks=True, cmap=plt.cm.Blues)
+plt.xticks(range(len(classes)), classes, fontsize=12)
+plt.yticks(range(len(classes)), classes, fontsize=12)
+plt.show()
+
+# Generate and print the classification report
+cls_report = classification_report(y_true, y_pred, target_names=classes)
+print(cls_report)
+
+isualization 2 (Random)
+Visualization of performance of a few random images from a random batch In [68]:  ncols = 4
+nrows = 2
+
+if batch_size_t<4:
+    cols = 1
+    
+count = ncols*nrows
+    
+
+subplot_params = get_reset_subplot_params(nrows, ncols, dpi)
+plot_params = get_reset_plot_params()
+
+
+show_predictions(y_img_batch, y_true_batch, y_pred_batch, subplot_params, plot_params, class_map, testing_dir, image_file_name_sample, count=count
+
+import os
+import shutil
+import pandas as pd
+from keras.preprocessing.image import ImageDataGenerator
+
+# Configuration for input/output directories
+input_directory = "path/to/your/input_directory"  # Make sure to define this
+testing_dir_main = input_directory + "test_main"
+
+# Parameters for data processing
+test_batch_size = 1024
+test_main_shuffle = False
+class_mode = None  # No classes are being inferred
+target_size = (96, 96)  # Example target size, adjust as needed
+rescale = 1./255  # Rescaling factor for image normalization
+
+# Set up the testing data generator
+test_datagen_main = ImageDataGenerator(rescale=rescale)
+test_generator_main = test_datagen_main.flow_from_directory(
+    testing_dir_main,
+    target_size=target_size,
+    class_mode=class_mode,
+    batch_size=test_batch_size,
+    shuffle=test_main_shuffle)
+
+# Predicting using the model
+nsteps = len(test_generator_main)
+y_pred = model.predict_generator(test_generator_main, steps=nsteps, verbose=1)
+y_pred2 = y_pred.argmax(axis=-1)
+
+# Retrieve filenames and prepare submission data
+test_file_names = test_generator_main.filenames
+rows = []
+for i in range(len(test_file_names)):
+    file_id = test_file_names[i].split("\\")[1][:-4]  # Adjust the splitting based on your OS and file path
+    predicted_class = y_pred2[i]
+    rows.append([file_id, predicted_class])
+
+# Create a DataFrame and save the submission file
+result = pd.DataFrame(rows, columns=["id", "label"])
+result_directory = "data/output/result"
+
+# Ensure the result directory exists
+if not os.path.exists(result_directory):
+    os.mkdir(result_directory)
+
+submission_csv = os.path.join(result_directory, "submission.csv")
+result.to_csv(submission_csv, index=False)
+
+print(f"Submission file saved to: {submission_csv}")
+
+
+
+
