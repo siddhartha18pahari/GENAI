@@ -1,0 +1,27 @@
+document.getElementById('organizeForm').onsubmit = function(e) {
+    e.preventDefault();
+    
+    const data = {
+        srcDir: document.getElementById('srcDir').value,
+        organizedDir: document.getElementById('organizedDir').value,
+        trainDir: document.getElementById('trainDir').value,
+        valDir: document.getElementById('valDir').value,
+        testDir: document.getElementById('testDir').value,
+        labelCsvPath: document.getElementById('labelCsvPath').value,
+    };
+    
+    fetch('/organize_and_split', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('result').innerText = data.message;
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+};
