@@ -1,0 +1,65 @@
+#Prep
+import os
+import shutil
+import pandas as pd
+from sklearn.model_selection import train_test_split
+
+def ensure_directory_exists(directory):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+def read_label_map(csv_path):
+    df = pd.read_csv(csv_path, index_col='id')
+    return df['label'].to_dict()
+
+#Organize
+
+def organize_files_by_label(src_dir, dest_dir, label_map, label_names):
+    ensure_directory_exists(dest_dir)
+    for label, name in label_names.items():
+        ensure_directory_exists(os.path.join(dest_dir, name))
+    
+    for file in os.listdir(src_dir):
+        file_label = label_map.get(file.split('.')[0])
+        if file_label is not None:
+            label_dir = os.path.join(dest_dir, label_names[file_label])
+            shutil.copy(os.path.join(src_dir, file), os.path.join(label_dir, file))
+
+#split
+
+def split_data(src_dir, train_dir, val_dir, test_dir, test_size=0.2, val_size=0.25):
+    # Adjust val_size to account for the initial train/test split; e.g., 0.25 * 0.8 = 0.2
+    for class_dir in os.listdir(src_dir):
+        class_path = os.path.join(src_dir, class_dir)
+        files = os.listdir(class_path)
+        train_files, test_files = train_test_split(files, test_size=test_size)
+        train_files, val_files = train_test_split(train_files, test_size=val_size)
+
+        for f in train_files:
+            ensure_directory_exists(os.path.join(train_dir, class_dir))
+            shutil.move(os.path.join(class_path, f), os.path.join(train_dir, class_dir, f))
+        
+        for f in val_files:
+            ensure_directory_exists(os.path.join(val_dir, class_dir))
+            shutil.move(os.path.join(class_path, f), os.path.join(val_dir, class_dir, f))
+        
+        for f in test_files:
+            ensure_directory_exists(os.path.join(test_dir, class_dir))
+            shutil.move(os.path.join(class_path, f), os.path.join(test_dir, class_dir, f))
+
+#Integrate
+src_dir = "path/to/your/source/directory"
+organized_dir = "path/to/organized/directory"
+train_dir = "path/to/train/directory"
+val_dir = "path/to/val/directory"
+test_dir = "path/to/test/directory"
+label_csv_path = "path/to/labels.csv"
+
+label_map = read_label_map(label_csv_path)
+label_names = {0: 'Class0', 1: 'Class1'}  # Adjust based on your labels
+
+# Organize files by label
+organize_files_by_label(src_dir, organized_dir, label_map, label_names)
+
+# Split the data
+split_data(organized_dir, train_dir, val_dir, test_dir)
