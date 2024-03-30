@@ -1,0 +1,33 @@
+from flask import Flask, request, jsonify
+import json
+from your_dataset_organizer_module import organize_files_by_label, split_data, read_label_map  # Assuming the provided code is in this module
+
+app = Flask(__name__)
+
+@app.route('/organize_and_split', methods=['POST'])
+def organize_and_split():
+    data = request.json
+    src_dir = data['srcDir']
+    organized_dir = data['organizedDir']
+    train_dir = data['trainDir']
+    val_dir = data['valDir']
+    test_dir = data['testDir']
+    label_csv_path = data['labelCsvPath']
+    
+    try:
+        label_map = read_label_map(label_csv_path)
+        label_names = {0: 'Class0', 1: 'Class1'}  # Adjust based on your labels
+        
+        # Organize files by label
+        organize_files_by_label(src_dir, organized_dir, label_map, label_names)
+        
+        # Split the data
+        split_data(organized_dir, train_dir, val_dir, test_dir)
+        
+        return jsonify({'message': 'Dataset organized and split successfully!'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(debug=True)
+a
