@@ -1,6 +1,6 @@
 ### Cancer Marker Analysis from Nanoscopic-Tissue Images with Deep Tech (AI ML, Neural Network) 
 <pre>
-Domain             : Computer Vision, Machine Learning
+Domain             : Machine Learning
 Sub-Domain         : Deep Learning, Image Recognition
 Techniques         : Deep Convolutional Neural Network, Transfer Learning, ImageNet, Auto ML, NASNetMobile
 Application        : Image Recognition, Image Classification, Medical Imaging
@@ -75,7 +75,7 @@ Number of Class         : 2
 
 ##### Sample Output: 
 <kbd>
-<img src=https://github.com/siddhartha18pahari/GENAI/blob/main/CANCER1.png>
+<img src=https://github.com/siddhartha18pahari/GENAI/blob/main/CANCER1.png
 </kbd>
 
 
