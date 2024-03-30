@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dataset Organizer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Organize and Split Dataset</h1>
+    <form id="organizeForm">
+        <input type="text" id="srcDir" placeholder="Source Directory Path" required>
+        <input type="text" id="organizedDir" placeholder="Organized Directory Path" required>
+        <input type="text" id="trainDir" placeholder="Training Directory Path" required>
+        <input type="text" id="valDir" placeholder="Validation Directory Path" required>
+        <input type="text" id="testDir" placeholder="Test Directory Path" required>
+        <input type="text" id="labelCsvPath" placeholder="Label CSV Path" required>
+        <button type="submit">Organize and Split</button>
+    </form>
+    <div id="result"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
